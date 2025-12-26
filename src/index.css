@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-snap-type: none;
+    overscroll-behavior: smooth;
+  }
+
+  html, body {
+    overflow-x: hidden;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    background-color: #0B0B0B;
+    overflow-x: hidden;
+    color: rgba(255, 255, 255, 0.87);
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  /* Brand colors - Red and Black theme */
+  .text-brand-red {
+    color: #c41e3a;
+  }
+  
+  .bg-brand-red {
+    background-color: #c41e3a;
+  }
+  
+  .border-brand-red {
+    border-color: #c41e3a;
+  }
+  
+  /* Neon glow effects */
+  .text-neon-red {
+    text-shadow: 0 0 10px #c41e3a, 0 0 20px #c41e3a, 0 0 30px #c41e3a;
+  }
+  
+  .text-neon-red-sm {
+    text-shadow: 0 0 5px #c41e3a, 0 0 10px #c41e3a;
+  }
+  
+  .glow-red {
+    box-shadow: 0 0 20px #c41e3a, 0 0 40px #c41e3a, 0 0 60px #c41e3a;
+  }
+  
+  .glow-red-sm {
+    box-shadow: 0 0 10px #c41e3a, 0 0 20px #c41e3a;
+  }
+  
+  .glow-red-lg {
+    box-shadow: 0 0 30px #c41e3a, 0 0 60px #c41e3a, 0 0 90px #c41e3a;
+  }
+  
+  .bg-radial-casino {
+    background: radial-gradient(ellipse at center, rgba(196, 30, 58, 0.15) 0%, transparent 70%);
+  }
+
+  /* Wood texture utility */
+  .bg-mahogany {
+    background: linear-gradient(135deg, #8B4513 0%, #654321 25%, #4a2c17 50%, #654321 75%, #8B4513 100%);
+  }
+
+  /* Chrome metallic effect */
+  .bg-chrome {
+    background: linear-gradient(180deg, #e0e0e0 0%, #a0a0a0 30%, #808080 50%, #a0a0a0 70%, #e0e0e0 100%);
+  }
+}
+
