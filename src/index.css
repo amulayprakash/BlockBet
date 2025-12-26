@@ -1,10 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Brand Palette */
+    --color-primary-black: #0a0a0a;
+    --color-secondary-gold: #d4a847;
+    --color-accent-red: #dc2626;
+    --color-accent-emerald: #10b981;
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #a0a0a0;
+    
+    /* Effects */
+    --glass-bg: rgba(20, 20, 20, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.1);
+  }
+
   * {
     margin: 0;
     padding: 0;
@@ -25,63 +41,113 @@
     margin: 0;
     min-width: 320px;
     min-height: 100vh;
-    background-color: #0B0B0B;
+    background-color: var(--color-primary-black);
     overflow-x: hidden;
-    color: rgba(255, 255, 255, 0.87);
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: var(--color-text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cinzel', serif;
+  }
 }
 
 @layer utilities {
-  /* Brand colors - Red and Black theme */
-  .text-brand-red {
-    color: #c41e3a;
+  /* Premium Text Utilities */
+  .text-gold {
+    color: var(--color-secondary-gold);
   }
   
-  .bg-brand-red {
-    background-color: #c41e3a;
-  }
-  
-  .border-brand-red {
-    border-color: #c41e3a;
-  }
-  
-  /* Neon glow effects */
-  .text-neon-red {
-    text-shadow: 0 0 10px #c41e3a, 0 0 20px #c41e3a, 0 0 30px #c41e3a;
-  }
-  
-  .text-neon-red-sm {
-    text-shadow: 0 0 5px #c41e3a, 0 0 10px #c41e3a;
-  }
-  
-  .glow-red {
-    box-shadow: 0 0 20px #c41e3a, 0 0 40px #c41e3a, 0 0 60px #c41e3a;
-  }
-  
-  .glow-red-sm {
-    box-shadow: 0 0 10px #c41e3a, 0 0 20px #c41e3a;
-  }
-  
-  .glow-red-lg {
-    box-shadow: 0 0 30px #c41e3a, 0 0 60px #c41e3a, 0 0 90px #c41e3a;
-  }
-  
-  .bg-radial-casino {
-    background: radial-gradient(ellipse at center, rgba(196, 30, 58, 0.15) 0%, transparent 70%);
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #ffd866 0%, #d4a847 50%, #b8860b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  /* Wood texture utility */
-  .bg-mahogany {
-    background: linear-gradient(135deg, #8B4513 0%, #654321 25%, #4a2c17 50%, #654321 75%, #8B4513 100%);
+  /* Glassmorphism Cards */
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   }
 
-  /* Chrome metallic effect */
-  .bg-chrome {
-    background: linear-gradient(180deg, #e0e0e0 0%, #a0a0a0 30%, #808080 50%, #a0a0a0 70%, #e0e0e0 100%);
+  .glass-card-hover {
+    transition: all 0.3s ease;
+  }
+
+  .glass-card-hover:hover {
+    background: rgba(30, 30, 30, 0.7);
+    border-color: rgba(212, 168, 71, 0.3);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 168, 71, 0.1);
+    transform: translateY(-4px);
+  }
+
+  /* Premium Buttons */
+  .btn-premium {
+    background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(220, 38, 38, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-premium:hover {
+    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+    box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6);
+    transform: translateY(-2px);
+  }
+  
+  .btn-premium::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: 0.5s;
+  }
+  
+  .btn-premium:hover::after {
+    left: 100%;
+  }
+
+  .btn-outline-gold {
+    background: transparent;
+    border: 1px solid rgba(212, 168, 71, 0.5);
+    color: #ebd395;
+    transition: all 0.3s ease;
+  }
+
+  .btn-outline-gold:hover {
+    border-color: #d4a847;
+    background: rgba(212, 168, 71, 0.1);
+    color: #fff;
+    box-shadow: 0 0 15px rgba(212, 168, 71, 0.2);
+  }
+
+  /* Decorative Glows */
+  .gold-glow {
+    box-shadow: 0 0 30px rgba(212, 168, 71, 0.15);
+  }
+  
+  .red-glow {
+    box-shadow: 0 0 30px rgba(220, 38, 38, 0.15);
+  }
+
+  /* Animation Utilities */
+  .hover-scale {
+    transition: transform 0.3s ease;
+  }
+  
+  .hover-scale:hover {
+    transform: scale(1.02);
   }
 }
-
