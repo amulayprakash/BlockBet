@@ -1,25 +1,25 @@
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
-import { LogIn, Coins, Trophy } from 'lucide-react';
+import { Wallet, Users, Trophy } from 'lucide-react';
 
 const steps = [
   {
-    title: 'Join a Room',
-    description: 'Choose a room with a fixed stake and limited number of players. Browse active rooms and pick your battle.',
-    icon: LogIn,
+    title: 'Connect & Select Room',
+    description: 'Connect your crypto wallet and browse the Betting Rooms Lobby. Each room shows entry stake, max participants, current fill status, and payout structure (single winner or top 3).',
+    icon: Wallet,
     color: 'from-amber-500 to-amber-600',
     delay: 0.2,
   },
   {
-    title: 'Place Bet',
-    description: 'Deposit the required stake. Funds are locked instantly on the blockchain until the round completes.',
-    icon: Coins,
+    title: 'Join & Lock Stake',
+    description: 'Select a room, review rules, and confirm entry. Complete the 3-step transaction: sign disclaimer, approve tokens, then stake. Your funds are locked on-chain until settlement.',
+    icon: Users,
     color: 'from-red-500 to-red-600',
     delay: 0.4,
   },
   {
-    title: 'Win & Withdraw',
-    description: 'If the wheel lands on your number or color, winnings are instantly transferred to your wallet.',
+    title: 'Auto-Settle & Win',
+    description: 'When the room fills, it auto-closes and triggers provably-fair randomness. Winners are determined automatically, payouts are distributed instantly, and your dashboard updates with withdrawable balance.',
     icon: Trophy,
     color: 'from-emerald-500 to-emerald-600',
     delay: 0.6,
@@ -132,3 +132,4 @@ export function HowItWorks() {
     </section>
   );
 }
+
