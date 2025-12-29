@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Wallet, LogOut } from 'lucide-react';
 import { useWallet } from '../contexts/WalletContext';
-import { WalletConnectModal } from './WalletConnectModal';
+import { useAppKit } from '@reown/appkit/react';
 
 const navLinks = [
   { name: 'Home', href: '#home' },
@@ -16,9 +16,9 @@ const navLinks = [
 export function Navbar() {
   const navigate = useNavigate();
   const { address, isConnected, disconnect } = useWallet();
+  const { open } = useAppKit(); // AppKit modal trigger
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
 
   const truncateAddress = (addr) => {
     if (!addr) return '';
@@ -107,7 +107,7 @@ export function Navbar() {
               </>
             ) : (
               <motion.button
-                onClick={() => setIsWalletModalOpen(true)}
+                onClick={() => open()}
                 className="flex px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold text-sm rounded-lg shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all duration-300 items-center gap-2"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -179,7 +179,7 @@ export function Navbar() {
             ) : (
               <button
                 onClick={() => {
-                  setIsWalletModalOpen(true);
+                  open();
                   setIsMobileMenuOpen(false);
                 }}
                 className="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg flex items-center justify-center gap-2"
@@ -191,12 +191,6 @@ export function Navbar() {
           </div>
         </div>
       </motion.div>
-
-      {/* Wallet Connect Modal */}
-      <WalletConnectModal
-        isOpen={isWalletModalOpen}
-        onClose={() => setIsWalletModalOpen(false)}
-      />
     </motion.nav>
   );
 }

@@ -14,6 +14,8 @@
     "@fontsource/inter": "^5.2.8",
     "@fontsource/playfair-display": "^5.2.8",
     "@fontsource/roboto": "^5.2.9",
+    "@reown/appkit": "^1.8.15",
+    "@reown/appkit-adapter-wagmi": "^1.8.15",
     "@reown/walletkit": "^1.4.1",
     "@tanstack/react-query": "^5.90.12",
     "@walletconnect/core": "^2.23.1",
