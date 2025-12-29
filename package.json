@@ -14,11 +14,20 @@
     "@fontsource/inter": "^5.2.8",
     "@fontsource/playfair-display": "^5.2.8",
     "@fontsource/roboto": "^5.2.9",
+    "@reown/walletkit": "^1.4.1",
+    "@tanstack/react-query": "^5.90.12",
+    "@walletconnect/core": "^2.23.1",
+    "@walletconnect/utils": "^2.23.1",
+    "ethers": "^6.16.0",
     "framer-motion": "^12.23.26",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "react-intersection-observer": "^10.0.0"
+    "react-intersection-observer": "^10.0.0",
+    "react-router-dom": "^7.11.0",
+    "sweetalert2": "^11.26.17",
+    "viem": "^2.43.3",
+    "wagmi": "^3.1.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

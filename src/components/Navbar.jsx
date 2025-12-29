@@ -1,5 +1,9 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Wallet, LogOut } from 'lucide-react';
+import { useWallet } from '../contexts/WalletContext';
+import { WalletConnectModal } from './WalletConnectModal';
 
 const navLinks = [
   { name: 'Home', href: '#home' },
@@ -10,8 +14,21 @@ const navLinks = [
 ];
 
 export function Navbar() {
+  const navigate = useNavigate();
+  const { address, isConnected, disconnect } = useWallet();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
+
+  const truncateAddress = (addr) => {
+    if (!addr) return '';
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
+
+  const handleDisconnect = async () => {
+    await disconnect();
+    setIsMobileMenuOpen(false);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,10 +58,10 @@ export function Navbar() {
           : 'bg-transparent'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
+      <div className="w-full px-4 md:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 md:h-20 w-full">
           
-          {/* Brand Logo */}
+          {/* Brand Logo - Extreme Left */}
           <motion.a 
             href="#home"
             onClick={(e) => scrollToSection(e, '#home')}
@@ -68,32 +85,38 @@ export function Navbar() {
             </div>
           </motion.a>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <motion.a
-                key={link.name}
-                href={link.href}
-                onClick={(e) => scrollToSection(e, link.href)}
-                className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white rounded-lg hover:bg-white/5 transition-all duration-200"
+          {/* Right side - Wallet/Disconnect - Extreme Right */}
+          <div className="flex items-center gap-3">
+            {isConnected ? (
+              <>
+                <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-lg">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                  <span className="text-sm font-medium text-gray-300">
+                    {truncateAddress(address)}
+                  </span>
+                </div>
+                <motion.button
+                  onClick={handleDisconnect}
+                  className="flex px-4 py-2 bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-all text-sm font-medium items-center gap-2"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span className="hidden sm:inline">Disconnect</span>
+                </motion.button>
+              </>
+            ) : (
+              <motion.button
+                onClick={() => setIsWalletModalOpen(true)}
+                className="flex px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold text-sm rounded-lg shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all duration-300 items-center gap-2"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {link.name}
-              </motion.a>
-            ))}
-          </div>
-
-          {/* Right side - Sign In */}
-          <div className="flex items-center gap-3">
-            {/* Sign In Button */}
-            <motion.button
-              className="hidden sm:flex px-5 py-2.5 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold text-sm rounded-lg shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all duration-300"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Sign In
-            </motion.button>
+                <Wallet className="w-4 h-4" />
+                <span className="hidden sm:inline">Connect Wallet</span>
+                <span className="sm:hidden">Connect</span>
+              </motion.button>
+            )}
 
             {/* Mobile menu button */}
             <motion.button
@@ -137,12 +160,43 @@ export function Navbar() {
             </a>
           ))}
           <div className="pt-2 border-t border-white/10">
-            <button className="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg">
-              Sign In
-            </button>
+            {isConnected ? (
+              <>
+                <div className="px-4 py-3 mb-2 bg-white/5 border border-white/10 rounded-lg flex items-center gap-2">
+                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+                  <span className="text-sm font-medium text-gray-300">
+                    {truncateAddress(address)}
+                  </span>
+                </div>
+                <button
+                  onClick={handleDisconnect}
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg transition-all text-sm font-medium flex items-center justify-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Disconnect
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => {
+                  setIsWalletModalOpen(true);
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-semibold rounded-lg flex items-center justify-center gap-2"
+              >
+                <Wallet className="w-4 h-4" />
+                Connect Wallet
+              </button>
+            )}
           </div>
         </div>
       </motion.div>
+
+      {/* Wallet Connect Modal */}
+      <WalletConnectModal
+        isOpen={isWalletModalOpen}
+        onClose={() => setIsWalletModalOpen(false)}
+      />
     </motion.nav>
   );
 }

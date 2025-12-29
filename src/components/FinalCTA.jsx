@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
+import { useNavigate } from 'react-router-dom';
 
 // Animated French roulette chip
 function SpinningRouletteChip() {
@@ -65,6 +66,7 @@ function SpinningRouletteChip() {
 }
 
 export function FinalCTA() {
+  const navigate = useNavigate();
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.3,
@@ -130,6 +132,7 @@ export function FinalCTA() {
             className="flex flex-col sm:flex-row gap-4 justify-center items-center"
           >
             <motion.button
+              onClick={() => navigate('/dashboard/rooms')}
               className="px-10 py-5 bg-gradient-to-r from-amber-500 to-amber-600 text-gray-900 font-bold text-xl rounded-lg shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 transition-all duration-300 flex items-center gap-3"
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}
@@ -140,6 +143,7 @@ export function FinalCTA() {
               Connect Wallet
             </motion.button>
             <motion.button
+              onClick={() => navigate('/dashboard/rooms')}
               className="px-10 py-5 bg-transparent border-2 border-amber-500/50 text-amber-400 font-bold text-xl rounded-lg hover:bg-amber-500/10 transition-all duration-300"
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.95 }}

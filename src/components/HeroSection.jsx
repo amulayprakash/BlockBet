@@ -1,5 +1,6 @@
 import { motion, useMotionValue, useTransform, useSpring, useAnimationControls } from 'framer-motion';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Crown, Flame, Coins, Dices } from 'lucide-react';
 
 // French Roulette numbers in exact wheel order
@@ -344,6 +345,7 @@ function RealisticRouletteWheel({ mouseX, mouseY, isMobile }) {
 // Simplified stats ticker - Moved to bottom
 
 export function HeroSection() {
+  const navigate = useNavigate();
   const containerRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
   const mouseX = useMotionValue(0.5);
@@ -453,6 +455,7 @@ export function HeroSection() {
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8 md:mb-12">
             <motion.button
+              onClick={() => navigate('/dashboard/rooms')}
               className="btn-premium px-8 py-4 text-white font-bold text-lg rounded-lg uppercase tracking-wider"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -461,6 +464,12 @@ export function HeroSection() {
             </motion.button>
             
             <motion.button
+              onClick={() => {
+                const element = document.querySelector('#how-it-works');
+                if (element) {
+                  element.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
               className="btn-outline-gold px-8 py-4 font-bold text-lg rounded-lg uppercase tracking-wider backdrop-blur-sm"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
