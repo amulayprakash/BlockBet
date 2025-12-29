@@ -7,3 +7,9 @@
 [build.environment]
   # WalletConnect Project ID is safe to expose (public client-side ID)
   SECRETS_SCAN_OMIT_KEYS = "VITE_WALLETCONNECT_PROJECT_ID"
+
+# Redirect all routes to index.html for React Router SPA
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
