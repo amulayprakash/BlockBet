@@ -41,7 +41,7 @@ function RoomCard({ room, index }) {
   };
 
   const handleJoinRoom = () => {
-    navigate(`/join/${room.roomId}`);
+    navigate(`/dashboard/rooms/join/${room.roomId}`);
   };
 
   return (

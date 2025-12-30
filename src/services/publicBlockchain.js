@@ -236,6 +236,36 @@ export async function getPublicRoomDetails(roomId) {
 }
 
 /**
+ * Get player's stake in a specific room
+ * This function can be called without wallet connection
+ */
+export async function getPublicPlayerStake(roomId, playerAddress) {
+  try {
+    const contract = getPublicBettingRoomsContract();
+    const stake = await contract.getPlayerStake(roomId, playerAddress);
+    return stake.toString();
+  } catch (error) {
+    console.error(`Error fetching public player stake for ${playerAddress} in room ${roomId}:`, error);
+    return '0';
+  }
+}
+
+/**
+ * Get players list for a room
+ * This function can be called without wallet connection
+ */
+export async function getPublicRoomPlayers(roomId) {
+  try {
+    const contract = getPublicBettingRoomsContract();
+    const players = await contract.getRoomPlayers(roomId);
+    return players;
+  } catch (error) {
+    console.error(`Error fetching public room players for room ${roomId}:`, error);
+    return [];
+  }
+}
+
+/**
  * Get the total number of rooms
  * This function can be called without wallet connection
  */

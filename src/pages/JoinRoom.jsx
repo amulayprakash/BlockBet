@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Users, Trophy, Coins, Info, Loader2, Zap, TrendingUp, DollarSign, Timer, CheckCircle2, Circle, FileSignature, Shield, Wallet } from 'lucide-react';
 import Swal from 'sweetalert2';
-import { getRoomDetails, joinRoom, formatTokenAmount, parseTokenAmount, getTokenBalance, getTokenAllowance, approveInfiniteTokens, hasInfiniteAllowance, signDisclaimerMessage } from '../services/blockchain';
+import { getPublicRoomDetails, formatTokenAmount } from '../services/publicBlockchain';
+import { joinRoom, parseTokenAmount, getTokenBalance, approveInfiniteTokens, hasInfiniteAllowance, signDisclaimerMessage } from '../services/blockchain';
 import { useWallet } from '../contexts/WalletContext';
 import { CountdownTimer } from '../components/CountdownTimer';
 import CONFIG from '../config/blockchain';
@@ -25,7 +26,7 @@ export function JoinRoom() {
     const fetchRoomData = async () => {
       try {
         setLoading(true);
-        const roomDetails = await getRoomDetails(roomId);
+        const roomDetails = await getPublicRoomDetails(roomId);
         
         setRoom(roomDetails);
       } catch (error) {

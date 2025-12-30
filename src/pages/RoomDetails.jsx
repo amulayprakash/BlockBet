@@ -20,11 +20,11 @@ import {
   Hash
 } from 'lucide-react';
 import { 
-  getRoomDetails, 
-  formatTokenAmount, 
-  getPlayerStake, 
-  getRoomPlayers 
-} from '../services/blockchain';
+  getPublicRoomDetails,
+  getPublicPlayerStake,
+  getPublicRoomPlayers,
+  formatTokenAmount
+} from '../services/publicBlockchain';
 import { useWallet } from '../contexts/WalletContext';
 import { CountdownTimer } from '../components/CountdownTimer';
 
@@ -46,16 +46,16 @@ export function RoomDetails() {
     const fetchRoomData = async () => {
       try {
         setLoading(true);
-        const roomDetails = await getRoomDetails(roomId);
+        const roomDetails = await getPublicRoomDetails(roomId);
         setRoom(roomDetails);
 
         // Fetch players list
-        const playersList = await getRoomPlayers(roomId);
+        const playersList = await getPublicRoomPlayers(roomId);
         setPlayers(playersList);
 
         // Fetch user's stake if connected
         if (address) {
-          const stake = await getPlayerStake(roomId, address);
+          const stake = await getPublicPlayerStake(roomId, address);
           setUserStake(stake);
         }
       } catch (error) {
