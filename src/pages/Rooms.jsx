@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useInView } from 'react-intersection-observer';
 import { Users, Clock, Trophy, Zap, RefreshCw, Loader2, DollarSign, Timer } from 'lucide-react';
 import Swal from 'sweetalert2';
-import { getAllRooms, getRoomPlayerCount, formatTokenAmount } from '../services/blockchain';
+import { getPublicActiveRooms, getAllPublicRooms, formatTokenAmount } from '../services/publicBlockchain';
 import { useWallet } from '../contexts/WalletContext';
 import { CountdownTimer } from '../components/CountdownTimer';
 
@@ -13,39 +13,13 @@ function RoomCard({ room, index }) {
     triggerOnce: true,
     threshold: 0.2,
   });
-  const [currentPlayers, setCurrentPlayers] = useState(room.currentPlayers || 0);
   const { isConnected, isCorrectNetwork } = useWallet();
   const navigate = useNavigate();
 
-  // Initialize player count from room data (only when roomId changes)
-  useEffect(() => {
-    if (room.currentPlayers !== undefined) {
-      setCurrentPlayers(room.currentPlayers);
-    } else {
-      setCurrentPlayers(0);
-    }
-  }, [room.roomId]); // Only update when roomId changes
-
-  // Only fetch player count if not provided and card is in view (one-time fetch, no interval)
-  useEffect(() => {
-    if (room.currentPlayers === undefined && inView && currentPlayers === 0) {
-      const fetchPlayerCount = async () => {
-        try {
-          const count = await getRoomPlayerCount(room.roomId);
-          setCurrentPlayers(count);
-        } catch (error) {
-          console.error('Error fetching player count:', error);
-        }
-      };
-
-      fetchPlayerCount();
-    }
-  }, [room.roomId, inView, currentPlayers]); // Only fetch once when card comes into view
-
-  const progress = 100; // No max players, always show as active
+  const currentPlayers = room.currentPlayers || 0;
   const isAvailable = !room.closed && !room.settled;
   const payoutTypeText = room.payoutType === 0 ? 'Single Winner' : 'Top 3 Winners';
-  const displayRoomId = room.roomId + 1; // Display room ID starting from 1
+  const displayRoomId = room.displayRoomId || (room.roomId + 1); // Use displayRoomId from public service
 
   return (
     <motion.div
@@ -60,7 +34,7 @@ function RoomCard({ room, index }) {
         <div>
           <h3 className="text-2xl font-bold text-white mb-2">
             <span className="text-red-500">
-              {formatTokenAmount(room.minStakeAmount)} - {formatTokenAmount(room.maxStakeAmount)}
+              {room.minStakeFormatted || formatTokenAmount(room.minStakeAmount)} - {room.maxStakeFormatted || formatTokenAmount(room.maxStakeAmount)}
             </span> USDT
           </h3>
           <p className="text-gray-400 text-sm flex items-center gap-2">
@@ -100,7 +74,7 @@ function RoomCard({ room, index }) {
             <span className="text-sm font-semibold text-gray-300 uppercase tracking-wider">Total Pool</span>
           </div>
           <span className="text-2xl font-bold text-emerald-400">
-            {formatTokenAmount(room.totalPool)} USDT
+            {room.totalPoolFormatted || formatTokenAmount(room.totalPool)} USDT
           </span>
         </div>
       </div>
@@ -173,12 +147,9 @@ export function Rooms() {
       setLoading(true);
     }
     try {
-      const allRooms = await getAllRooms();
-      // Filter to show only available rooms (not closed, not settled)
-      const availableRooms = allRooms.filter(
-        (room) => !room.closed && !room.settled
-      );
-      setRooms(availableRooms);
+      // Use public blockchain service to fetch rooms without wallet connection
+      const activeRooms = await getPublicActiveRooms();
+      setRooms(activeRooms);
     } catch (error) {
       console.error('Error fetching rooms:', error);
       // Set empty array on error to prevent infinite loading
@@ -202,6 +173,9 @@ export function Rooms() {
 
   useEffect(() => {
     fetchRooms();
+    // Auto-refresh every 30 seconds
+    const interval = setInterval(() => fetchRooms(false), 30000);
+    return () => clearInterval(interval);
   }, []);
 
 

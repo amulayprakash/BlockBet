@@ -1,58 +1,47 @@
 import { motion } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { useState, useEffect } from 'react';
-
-const mockRooms = [
-  {
-    id: 1,
-    stakeAmount: '100',
-    token: 'USDT',
-    maxPlayers: 10,
-    currentPlayers: 7,
-    payoutType: 'SINGLE_WINNER',
-    timeRemaining: 300, // seconds
-  },
-  {
-    id: 2,
-    stakeAmount: '500',
-    token: 'USDT',
-    maxPlayers: 5,
-    currentPlayers: 4,
-    payoutType: 'TOP_3',
-    timeRemaining: 180,
-  },
-  {
-    id: 3,
-    stakeAmount: '50',
-    token: 'USDT',
-    maxPlayers: 20,
-    currentPlayers: 15,
-    payoutType: 'SINGLE_WINNER',
-    timeRemaining: 120,
-  },
-];
+import { getPublicActiveRooms } from '../services/publicBlockchain';
+import { useNavigate } from 'react-router-dom';
 
 function RoomCard({ room, index }) {
   const [ref, inView] = useInView({
     triggerOnce: true,
     threshold: 0.2,
   });
+  const navigate = useNavigate();
 
-  const [timeRemaining, setTimeRemaining] = useState(room.timeRemaining);
-  const progress = (room.currentPlayers / room.maxPlayers) * 100;
+  const [timeRemaining, setTimeRemaining] = useState(0);
 
   useEffect(() => {
-    if (!inView) return;
+    // Calculate initial time remaining
+    const now = Math.floor(Date.now() / 1000);
+    const remaining = Math.max(0, room.settlementTimestamp - now);
+    setTimeRemaining(remaining);
+  }, [room.settlementTimestamp]);
+
+  useEffect(() => {
+    if (!inView || timeRemaining <= 0) return;
     const interval = setInterval(() => {
       setTimeRemaining((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
     return () => clearInterval(interval);
-  }, [inView]);
+  }, [inView, timeRemaining]);
 
   const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
+    if (seconds <= 0) return '0:00';
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${mins}m`;
+    }
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleJoinRoom = () => {
+    navigate(`/join/${room.roomId}`);
   };
 
   return (
@@ -67,10 +56,10 @@ function RoomCard({ room, index }) {
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="text-2xl font-bold text-white mb-2">
-            <span className="text-casino-red">{room.stakeAmount}</span> {room.token}
+            Room <span className="text-casino-red">#{room.displayRoomId}</span>
           </h3>
           <p className="text-gray-400 text-sm">
-            {room.payoutType === 'SINGLE_WINNER' ? 'Single Winner' : 'Top 3 Winners'}
+            {room.payoutType === 0 ? 'Single Winner' : 'Top 3 Winners'}
           </p>
         </div>
         <motion.div
@@ -82,22 +71,44 @@ function RoomCard({ room, index }) {
         </motion.div>
       </div>
 
+      <div className="mb-4 space-y-2">
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-400">Stake Range:</span>
+          <span className="text-white font-semibold">
+            {room.minStakeFormatted} - {room.maxStakeFormatted} USDT
+          </span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-400">Total Pool:</span>
+          <span className="text-neon-red font-bold">
+            {room.totalPoolFormatted} USDT
+          </span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-400">Players:</span>
+          <span className="text-white font-semibold">
+            {room.currentPlayers}
+          </span>
+        </div>
+      </div>
+
       <div className="mb-4">
         <div className="flex justify-between text-sm text-gray-300 mb-2">
-          <span>Players: {room.currentPlayers}/{room.maxPlayers}</span>
+          <span>Time Remaining</span>
           <span className="text-casino-red font-bold">{formatTime(timeRemaining)}</span>
         </div>
         <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
           <motion.div
             className="h-full bg-gradient-to-r from-casino-red to-casino-red-light"
             initial={{ width: 0 }}
-            animate={inView ? { width: `${progress}%` } : {}}
+            animate={inView ? { width: timeRemaining > 0 ? '100%' : '0%' } : {}}
             transition={{ duration: 1, delay: index * 0.1 + 0.3 }}
           />
         </div>
       </div>
 
       <motion.button
+        onClick={handleJoinRoom}
         className="w-full py-3 bg-casino-red text-white font-bold rounded-lg hover:bg-casino-red-light transition-colors duration-300"
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
@@ -113,6 +124,34 @@ export function LiveRoomPreview() {
     triggerOnce: true,
     threshold: 0.1,
   });
+  const navigate = useNavigate();
+
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchRooms();
+    // Refresh rooms every 30 seconds
+    const interval = setInterval(fetchRooms, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const fetchRooms = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const activeRooms = await getPublicActiveRooms();
+      setRooms(activeRooms);
+    } catch (err) {
+      console.error('Error fetching rooms:', err);
+      setError('Failed to load rooms. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const displayRooms = rooms.slice(0, 3); // Show only first 3 rooms
 
   return (
     <section ref={ref} className="py-20 md:py-32 px-4 bg-casino-black">
@@ -131,26 +170,57 @@ export function LiveRoomPreview() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-          {mockRooms.map((room, index) => (
-            <RoomCard key={room.id} room={room} index={index} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="text-center py-20">
+            <motion.div
+              className="inline-block w-16 h-16 border-4 border-casino-red border-t-transparent rounded-full"
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            />
+            <p className="text-gray-400 mt-4">Loading rooms...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <p className="text-red-500 mb-4">{error}</p>
+            <motion.button
+              onClick={fetchRooms}
+              className="px-6 py-3 bg-casino-red text-white font-bold rounded-lg hover:bg-casino-red-light transition-colors duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Retry
+            </motion.button>
+          </div>
+        ) : displayRooms.length === 0 ? (
+          <div className="text-center py-20">
+            <p className="text-gray-400 text-xl mb-4">No active rooms available</p>
+            <p className="text-gray-500">Check back later for new betting opportunities!</p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              {displayRooms.map((room, index) => (
+                <RoomCard key={room.roomId} room={room} index={index} />
+              ))}
+            </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ delay: 0.5, duration: 0.6 }}
-          className="text-center mt-12"
-        >
-          <motion.button
-            className="px-8 py-4 bg-transparent border-2 border-casino-red text-casino-red font-bold text-lg rounded-lg hover:bg-casino-red hover:text-white transition-all duration-300"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            View All Rooms
-          </motion.button>
-        </motion.div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={inView ? { opacity: 1 } : {}}
+              transition={{ delay: 0.5, duration: 0.6 }}
+              className="text-center mt-12"
+            >
+              <motion.button
+                onClick={() => navigate('/rooms')}
+                className="px-8 py-4 bg-transparent border-2 border-casino-red text-casino-red font-bold text-lg rounded-lg hover:bg-casino-red hover:text-white transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                View All Rooms {rooms.length > 3 && `(${rooms.length})`}
+              </motion.button>
+            </motion.div>
+          </>
+        )}
       </div>
     </section>
   );
