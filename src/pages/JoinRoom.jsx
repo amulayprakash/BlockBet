@@ -405,12 +405,73 @@ export function JoinRoom() {
             </label>
             <div className="relative">
               <input
-                type="number"
-                min={formatTokenAmount(room.minStakeAmount)}
-                max={formatTokenAmount(room.maxStakeAmount)}
-                step="0.0001"
+                type="text"
+                inputMode="decimal"
                 value={stakeAmount}
-                onChange={(e) => setStakeAmount(e.target.value)}
+                onChange={(e) => {
+                  let value = e.target.value;
+                  
+                  // Allow empty input
+                  if (value === '') {
+                    setStakeAmount('');
+                    return;
+                  }
+                  
+                  // Remove any non-numeric characters except decimal point
+                  value = value.replace(/[^0-9.]/g, '');
+                  
+                  // Prevent multiple decimal points
+                  const decimalCount = (value.match(/\./g) || []).length;
+                  if (decimalCount > 1) {
+                    return;
+                  }
+                  
+                  // Restrict to 1 decimal place
+                  const parts = value.split('.');
+                  if (parts.length === 2 && parts[1].length > 1) {
+                    value = `${parts[0]}.${parts[1].substring(0, 1)}`;
+                  }
+                  
+                  // Parse the value to check bounds
+                  const numValue = parseFloat(value);
+                  const minStake = parseFloat(formatTokenAmount(room.minStakeAmount));
+                  const maxStake = parseFloat(formatTokenAmount(room.maxStakeAmount));
+                  
+                  // If value is a complete number (not ending in decimal point)
+                  if (!value.endsWith('.') && !isNaN(numValue)) {
+                    // Clamp to min/max bounds
+                    if (numValue > maxStake) {
+                      value = maxStake.toFixed(1);
+                    }
+                    // Don't auto-increase if below min, just let user type
+                  }
+                  
+                  setStakeAmount(value);
+                }}
+                onBlur={(e) => {
+                  let value = e.target.value;
+                  if (value === '') return;
+                  
+                  const numValue = parseFloat(value);
+                  if (isNaN(numValue)) {
+                    setStakeAmount('');
+                    return;
+                  }
+                  
+                  const minStake = parseFloat(formatTokenAmount(room.minStakeAmount));
+                  const maxStake = parseFloat(formatTokenAmount(room.maxStakeAmount));
+                  
+                  // On blur, ensure value is within bounds
+                  let clampedValue = numValue;
+                  if (numValue < minStake) {
+                    clampedValue = minStake;
+                  } else if (numValue > maxStake) {
+                    clampedValue = maxStake;
+                  }
+                  
+                  // Format to 1 decimal place
+                  setStakeAmount(clampedValue.toFixed(1));
+                }}
                 placeholder={`Min: ${formatTokenAmount(room.minStakeAmount)} USDT`}
                 className="w-full px-5 py-4 bg-black/60 border border-white/10 rounded-lg text-white text-xl font-semibold focus:outline-none focus:border-red-500/50 focus:ring-2 focus:ring-red-500/20 transition-all"
                 disabled={joining || !isAvailable}
@@ -422,7 +483,7 @@ export function JoinRoom() {
             <div className="flex items-start gap-2 mt-3 text-sm text-gray-400">
               <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
               <span>
-                Enter an amount between <span className="text-white font-semibold">{formatTokenAmount(room.minStakeAmount)}</span> and <span className="text-white font-semibold">{formatTokenAmount(room.maxStakeAmount)}</span> USDT
+                Enter an amount between <span className="text-white font-semibold">{formatTokenAmount(room.minStakeAmount)}</span> and <span className="text-white font-semibold">{formatTokenAmount(room.maxStakeAmount)}</span> USDT (1 decimal place max)
               </span>
             </div>
           </div>

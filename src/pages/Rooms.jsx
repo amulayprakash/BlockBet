@@ -173,9 +173,6 @@ export function Rooms() {
 
   useEffect(() => {
     fetchRooms();
-    // Auto-refresh every 30 seconds
-    const interval = setInterval(() => fetchRooms(false), 30000);
-    return () => clearInterval(interval);
   }, []);
 
 

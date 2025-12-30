@@ -132,9 +132,6 @@ export function LiveRoomPreview() {
 
   useEffect(() => {
     fetchRooms();
-    // Refresh rooms every 30 seconds
-    const interval = setInterval(fetchRooms, 30000);
-    return () => clearInterval(interval);
   }, []);
 
   const fetchRooms = async () => {
