@@ -3,6 +3,8 @@ import { useInView } from 'react-intersection-observer';
 import { useState, useEffect } from 'react';
 import { getPublicActiveRooms } from '../services/publicBlockchain';
 import { useNavigate } from 'react-router-dom';
+import { Share2 } from 'lucide-react';
+import { ShareModal } from './ShareModal';
 
 function RoomCard({ room, index }) {
   const [ref, inView] = useInView({
@@ -10,6 +12,7 @@ function RoomCard({ room, index }) {
     threshold: 0.2,
   });
   const navigate = useNavigate();
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const [timeRemaining, setTimeRemaining] = useState(0);
 
@@ -42,6 +45,11 @@ function RoomCard({ room, index }) {
 
   const handleJoinRoom = () => {
     navigate(`/dashboard/rooms/join/${room.roomId}`);
+  };
+
+  const handleShareClick = (e) => {
+    e.stopPropagation();
+    setShowShareModal(true);
   };
 
   return (
@@ -107,14 +115,35 @@ function RoomCard({ room, index }) {
         </div>
       </div>
 
-      <motion.button
-        onClick={handleJoinRoom}
-        className="w-full py-3 bg-casino-red text-white font-bold rounded-lg hover:bg-casino-red-light transition-colors duration-300"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-      >
-        Join Room
-      </motion.button>
+      <div className="flex gap-2">
+        <motion.button
+          onClick={handleJoinRoom}
+          className="flex-1 py-3 bg-casino-red text-white font-bold rounded-lg hover:bg-casino-red-light transition-colors duration-300"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          Join Room
+        </motion.button>
+        
+        <motion.button
+          onClick={handleShareClick}
+          className="px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors duration-300 border border-gray-700"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          title="Share room"
+        >
+          <Share2 className="w-5 h-5" />
+        </motion.button>
+      </div>
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        roomId={room.roomId}
+        displayRoomId={room.displayRoomId}
+        totalPool={room.totalPoolFormatted}
+      />
     </motion.div>
   );
 }

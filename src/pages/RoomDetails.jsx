@@ -17,7 +17,8 @@ import {
   Clock,
   Award,
   User,
-  Hash
+  Hash,
+  Share2
 } from 'lucide-react';
 import { 
   getPublicRoomDetails,
@@ -27,6 +28,7 @@ import {
 } from '../services/publicBlockchain';
 import { useWallet } from '../contexts/WalletContext';
 import { CountdownTimer } from '../components/CountdownTimer';
+import { ShareModal } from '../components/ShareModal';
 
 export function RoomDetails() {
   const { roomId } = useParams();
@@ -37,6 +39,7 @@ export function RoomDetails() {
   const [userStake, setUserStake] = useState('0');
   const [players, setPlayers] = useState([]);
   const { address } = useWallet();
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Get type from query params (settled or unsettled)
   const type = searchParams.get('type') || 'unsettled';
@@ -109,16 +112,45 @@ export function RoomDetails() {
     <div className="min-h-screen bg-black text-white py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         {/* Back Button */}
-        <motion.button
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          onClick={() => navigate(-1)}
-          className="mb-6 flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
-        >
-          <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-medium">Back</span>
-        </motion.button>
+        <div className="flex items-center justify-between mb-6">
+          <motion.button
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors group"
+          >
+            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+            <span className="font-medium">Back</span>
+          </motion.button>
+
+          {/* Share Button */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <motion.button
+              onClick={() => setShowShareModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors duration-300 border border-gray-700"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              title="Share room"
+            >
+              <Share2 className="w-5 h-5" />
+              <span className="hidden sm:inline">Share</span>
+            </motion.button>
+          </motion.div>
+        </div>
+
+        {/* Share Modal */}
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          roomId={roomId}
+          displayRoomId={displayRoomId}
+          totalPool={room ? formatTokenAmount(room.totalPool) : null}
+        />
 
         {/* Header */}
         <motion.div

@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useInView } from 'react-intersection-observer';
-import { Users, Clock, Trophy, Zap, RefreshCw, Loader2, DollarSign, Timer } from 'lucide-react';
+import { Users, Clock, Trophy, Zap, RefreshCw, Loader2, DollarSign, Timer, Share2 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import { getPublicActiveRooms, getAllPublicRooms, formatTokenAmount } from '../services/publicBlockchain';
 import { useWallet } from '../contexts/WalletContext';
 import { CountdownTimer } from '../components/CountdownTimer';
+import { ShareModal } from '../components/ShareModal';
 
 function RoomCard({ room, index }) {
   const [ref, inView] = useInView({
@@ -15,11 +16,17 @@ function RoomCard({ room, index }) {
   });
   const { isConnected, isCorrectNetwork } = useWallet();
   const navigate = useNavigate();
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const currentPlayers = room.currentPlayers || 0;
   const isAvailable = !room.closed && !room.settled;
   const payoutTypeText = room.payoutType === 0 ? 'Single Winner' : 'Top 3 Winners';
   const displayRoomId = room.displayRoomId || (room.roomId + 1); // Use displayRoomId from public service
+
+  const handleShareClick = (e) => {
+    e.stopPropagation();
+    setShowShareModal(true);
+  };
 
   return (
     <motion.div
@@ -98,34 +105,55 @@ function RoomCard({ room, index }) {
         <CountdownTimer targetTimestamp={room.settlementTimestamp} className="text-sm" />
       </div>
 
-      <motion.button
-        onClick={() => navigate(`/dashboard/rooms/join/${room.roomId}`)}
-        disabled={!isAvailable || !isConnected || !isCorrectNetwork}
-        className={`w-full py-3 font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${
-          isAvailable && isConnected && isCorrectNetwork
-            ? 'btn-premium text-white'
-            : 'bg-gray-800 text-gray-500 cursor-not-allowed'
-        }`}
-        whileHover={
-          isAvailable && isConnected && isCorrectNetwork ? { scale: 1.02 } : {}
-        }
-        whileTap={
-          isAvailable && isConnected && isCorrectNetwork ? { scale: 0.98 } : {}
-        }
-      >
-        {!isConnected ? (
-          'Connect Wallet to Join'
-        ) : !isCorrectNetwork ? (
-          'Switch Network to Join'
-        ) : !isAvailable ? (
-          room.closed ? 'Room Closed' : room.settled ? 'Room Settled' : 'Room Full'
-        ) : (
-          <>
-            <Trophy className="w-5 h-5" />
-            <span>Join Room</span>
-          </>
-        )}
-      </motion.button>
+      <div className="flex gap-2">
+        <motion.button
+          onClick={() => navigate(`/dashboard/rooms/join/${room.roomId}`)}
+          disabled={!isAvailable || !isConnected || !isCorrectNetwork}
+          className={`flex-1 py-3 font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 ${
+            isAvailable && isConnected && isCorrectNetwork
+              ? 'btn-premium text-white'
+              : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+          }`}
+          whileHover={
+            isAvailable && isConnected && isCorrectNetwork ? { scale: 1.02 } : {}
+          }
+          whileTap={
+            isAvailable && isConnected && isCorrectNetwork ? { scale: 0.98 } : {}
+          }
+        >
+          {!isConnected ? (
+            'Connect Wallet to Join'
+          ) : !isCorrectNetwork ? (
+            'Switch Network to Join'
+          ) : !isAvailable ? (
+            room.closed ? 'Room Closed' : room.settled ? 'Room Settled' : 'Room Full'
+          ) : (
+            <>
+              <Trophy className="w-5 h-5" />
+              <span>Join Room</span>
+            </>
+          )}
+        </motion.button>
+
+        <motion.button
+          onClick={handleShareClick}
+          className="px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors duration-300 border border-gray-700"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          title="Share room"
+        >
+          <Share2 className="w-5 h-5" />
+        </motion.button>
+      </div>
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        roomId={room.roomId}
+        displayRoomId={displayRoomId}
+        totalPool={room.totalPoolFormatted || formatTokenAmount(room.totalPool)}
+      />
     </motion.div>
   );
 }

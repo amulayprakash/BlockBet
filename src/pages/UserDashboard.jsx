@@ -17,6 +17,7 @@ import {
   Timer,
   Zap,
   Eye,
+  Share2,
 } from 'lucide-react';
 import {
   getUserUnsettledRooms,
@@ -29,6 +30,7 @@ import {
 } from '../services/blockchain';
 import { useWallet } from '../contexts/WalletContext';
 import { CountdownTimer } from '../components/CountdownTimer';
+import { ShareModal } from '../components/ShareModal';
 
 function StatCard({ icon: Icon, label, value, color = 'text-white', delay = 0 }) {
   const [ref, inView] = useInView({
@@ -62,6 +64,7 @@ function RoomCard({ room, type, index }) {
   });
   const [playerCount, setPlayerCount] = useState(room.currentPlayers || 0);
   const navigate = useNavigate();
+  const [showShareModal, setShowShareModal] = useState(false);
 
   useEffect(() => {
     if (room.currentPlayers !== undefined) {
@@ -90,6 +93,11 @@ function RoomCard({ room, type, index }) {
       queryParams.set('winner', 'true');
     }
     navigate(`/dashboard/room/${room.roomId}?${queryParams.toString()}`);
+  };
+
+  const handleShareClick = (e) => {
+    e.stopPropagation();
+    setShowShareModal(true);
   };
 
   return (
@@ -186,15 +194,36 @@ function RoomCard({ room, type, index }) {
         </div>
       )}
 
-      {/* View Details Button */}
-      <motion.button
-        className="w-full py-3 font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 hover:text-white"
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-      >
-        <Eye className="w-5 h-5" />
-        <span>View Details</span>
-      </motion.button>
+      {/* Action Buttons */}
+      <div className="flex gap-2">
+        <motion.button
+          className="flex-1 py-3 font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-gray-300 hover:bg-white/10 hover:text-white"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <Eye className="w-5 h-5" />
+          <span>View Details</span>
+        </motion.button>
+
+        <motion.button
+          onClick={handleShareClick}
+          className="px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors duration-300 border border-gray-700"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          title="Share room"
+        >
+          <Share2 className="w-5 h-5" />
+        </motion.button>
+      </div>
+
+      {/* Share Modal */}
+      <ShareModal
+        isOpen={showShareModal}
+        onClose={() => setShowShareModal(false)}
+        roomId={room.roomId}
+        displayRoomId={displayRoomId}
+        totalPool={formatTokenAmount(room.totalPool || room.totalPrize || '0')}
+      />
     </motion.div>
   );
 }
